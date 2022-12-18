@@ -51,7 +51,7 @@ class UserDAO:
 
 
 
-def main(connection, userDao) -> None :
+def main(connection : mysql.connector.MySQLConnection, userDao : UserDAO) -> None :
     user = User()
     user.login  = "admin"
     user.passw  = "123"
@@ -76,10 +76,14 @@ if __name__ == "__main__":
         connection = mysql.connector.connect(**params)
     except mysql.connector.Error as err:
         print("Main: connection -> ", err)
+        exit()
     else:
         print("Connection OK")
+        userDao = UserDAO(connection)
+        main(connection, userDao)
+    finally:
+        connection.close()
 
-    userDao = UserDAO(connection)
 
-    main(connection, userDao)
-    
+   
+   
