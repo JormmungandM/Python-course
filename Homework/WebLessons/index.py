@@ -3,12 +3,12 @@
 import os
 
 objName = ["REQUEST_METHOD" , "QUERY_STRING" , "REQUEST_URI" , "REMOTE_ADDR" , "REQUEST_SCHEME" ]
-envs = "<ul>" + ''.join( f"<li>{k} = {v}</li>" for k,v in os.environ.items() if k in objName) + "<ul>"
+envs = "<ul>" + ''.join( f"<li>{k} = {v}</li>" for k,v in os.environ.items() ) + "<ul>"
 
 
 
 print( "Content-Type: text/html; charset=utf-8" )
-print( "" )
+print( "" )   # empty line
 print( f"""<!doctype html />
 <html>
 <head>

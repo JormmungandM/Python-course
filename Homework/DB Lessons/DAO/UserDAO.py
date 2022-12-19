@@ -28,15 +28,15 @@ class User :
                 self.email_code_attempts = row[8]
 
     def print( self ):
-        print ( f"Id: {self.id}\n" + 
-        f"Login: {self.login}\n" + 
-        f"Password: {self.passw}\n" + 
-        f"Name: {self.name}\n" + 
-        f"Salt: {self.salt}\n" + 
-        f"Avatar: {self.avatar}\n" + 
-        f"Email: {self.email}\n" + 
-        f"Email code: {self.email_code}\n" + 
-        f"Email code attempts: {self.email_code_attempts}\n")
+        print ( f"Id:           {self.id}\n" + 
+        f"Login:                {self.login}\n" + 
+        f"Password:             {self.passw}\n" + 
+        f"Name:                 {self.name}\n" + 
+        f"Salt:                 {self.salt}\n" + 
+        f"Avatar:               {self.avatar}\n" + 
+        f"Email:                {self.email}\n" + 
+        f"Email code:           {self.email_code}\n" + 
+        f"Email code attempts:  {self.email_code_attempts}\n")
 
 class UserDAO:
 
