@@ -1,0 +1,5 @@
+RewriteEngine on
+RewriteRule  request  request.py    [END,QSA] 
+RewriteRule  home     index.py      [END,QSA] 
+RewriteRule  items    api/items.py  [END,QSA]
+RewriteRule  auth     api/auth.py   [END,QSA] 
