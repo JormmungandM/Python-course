@@ -6,8 +6,8 @@ auth_header = None
  
 if 'HTTP_AUTHORIZATION' in os.environ.keys() : 
     auth_header = os.environ['HTTP_AUTHORIZATION'] 
-elif 'REDIRECT_HTTP_AUTHORIZATION' in os.environ.keys() : 
-    auth_header = os.environ['REDIRECT_HTTP_AUTHORIZATION'] 
+# elif 'REDIRECT_HTTP_AUTHORIZATION' in os.environ.keys() : 
+#     auth_header = os.environ['REDIRECT_HTTP_AUTHORIZATION'] 
  
 if not 'HTTP_AUTHORIZATION' in os.environ.keys(): 
     print("Status: 401 Unauthorized") 
@@ -15,10 +15,6 @@ if not 'HTTP_AUTHORIZATION' in os.environ.keys():
     print() 
     exit() 
      
-#print("Status: 200 OK") 
 print("Content-Type: text/plain") 
-
-
-
-print("123") 
+print("") 
 print("Secret item coming soon", end='')
