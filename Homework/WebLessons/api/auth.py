@@ -68,5 +68,5 @@ print()
 print( f'''{{
     "access_token": "{user.id}",
     "token_type": "Bearer",
-    "expires_in": 3600,
+    "expires_in": 3600
 }}''', end='' )
