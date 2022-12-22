@@ -11,7 +11,7 @@ if 'HTTP_AUTHORIZATION' in os.environ.keys() :
  
 if not 'HTTP_AUTHORIZATION' in os.environ.keys(): 
     print("Status: 401 Unauthorized") 
-    print("WWW-Authenticate: Bearer realm='Get token on /auth'") 
+    #print("WWW-Authenticate: Bearer realm='Get token on /auth'") 
     print() 
     exit() 
      

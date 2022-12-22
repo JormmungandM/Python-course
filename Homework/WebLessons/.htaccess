@@ -2,7 +2,8 @@ RewriteEngine on
 
 # RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-RewriteRule  request  request.py    [END,QSA] 
-RewriteRule  home     index.py      [END,QSA] 
-RewriteRule  auth     api/auth.py   [END,QSA] 
-RewriteRule  items    api/items.py  [END,QSA]
+RewriteRule  ^request$  request.py      [END,QSA] 
+RewriteRule  ^home$     envs.py         [END,QSA] 
+RewriteRule  ^auth$     api/auth.py     [END,QSA] 
+RewriteRule  ^items$    api/items.py    [END,QSA]
+RewriteRule  ^$         index.html      [END,QSA]

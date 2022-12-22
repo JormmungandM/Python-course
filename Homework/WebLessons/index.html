@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+   
+    <title>Py191</title>
+</head>
+<body>
+    <h1>Py-191</h1>
+    <div class="row">
+        <div class="input-field col s4">
+          <input id ="user-login" type="text" class="validate">
+          <label for="user-login">Логин</label>
+        </div>
+        <div class="input-field col s4">
+          <input id ="user-password" type="password" class="validate">
+          <label for="user-password">Пароль</label>
+        </div>
+        <div class="input-field col s4">
+            <input type="button" id="login-button" value="Войти" class="btn"/>
+        </div>
+    </div>
+    <p id="out"></p>
+
+<script>
+    document.addEventListener('DOMContentLoaded',()=>{
+        const loginButton = document.querySelector( "#login-button" );
+        if( ! loginButton ) throw "DOMContentLoaded: #login-button not found";
+        loginButton.addEventListener( 'click', loginButtonClick );
+    });
+
+    function loginButtonClick(e){
+        
+        const userLogin = document.querySelector( "#user-login" );
+        if( ! userLogin ) throw "loginButtonClick: #user-login not found";
+        const userPassword = document.querySelector( "#user-password" );
+        if( ! userLogin ) throw "loginButtonClick: #user-password not found";
+
+        const credentials = btoa( userLogin.value + ':' + userPassword.value ) ;
+
+        fetch( "/auth", {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Basic ' + credentials
+        }
+        }).then( r => {
+            if( r.status != 200 ){
+                alert("Логин или пароль неправильные")
+            }else{
+                r.text().then( t => {
+                    console.log( t );
+                })
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
