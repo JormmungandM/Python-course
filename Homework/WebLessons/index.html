@@ -23,18 +23,40 @@
           <input id ="user-password" type="password" class="validate">
           <label for="user-password">Пароль</label>
         </div>
-        <div class="input-field col s4">
+        <div  class="col s4">
             <input type="button" id="login-button" value="Войти" class="btn"/>
+            <!-- Прячим кнопку с помощью типа "hidden" -->
+            <input disabled type="button" id="items-button" value="Контент" class="btn"/>
         </div>
     </div>
-    <p id="out"></p>
+    <div class="row">
+        <p id="out"></p>
+    </div>
+    
 
 <script>
     document.addEventListener('DOMContentLoaded',()=>{
         const loginButton = document.querySelector( "#login-button" );
         if( ! loginButton ) throw "DOMContentLoaded: #login-button not found";
         loginButton.addEventListener( 'click', loginButtonClick );
+
+        const itemsButton = document.querySelector( "#items-button" );
+        if( ! itemsButton ) throw "DOMContentLoaded: #items-button not found";
+        itemsButton.addEventListener( 'click', itemsButtonClick );
     });
+
+    function itemsButtonClick(e){
+        
+        var access_token = window.sessionStorage.getItem( "access_token" ) ;
+        alert(access_token)
+        document.getElementById("out").value = access_token
+        fetch( "/items", {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + access_token
+        }
+        })
+    }
 
     function loginButtonClick(e){
         
@@ -54,9 +76,13 @@
             if( r.status != 200 ){
                 alert("Логин или пароль неправильные")
             }else{
-                r.text().then( t => {
-                    console.log( t );
-                })
+                r.json().then( j => {
+                    console.log( j );
+                    // window.sessionStorage.setItem( "access_token", j.access_token ) ;
+                    // alert(j.access_token)
+                    // При успешной авторизации показываем кнопку контент
+                    document.getElementById("items-button").removeAttribute("disabled");
+                });
             }
         });
     }

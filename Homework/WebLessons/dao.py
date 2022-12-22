@@ -165,78 +165,8 @@ class UserDAO:
 
     def auth_user(self, login:str, passw:str) -> User | None:
         user = self.get_user( login = login )
-        if  user != None:
-            # Хешируем входящий пароль и сравниваем с пользовательским. Если Treu, то авторизация прошла успешно
-            return hashlib.sha1((user.salt + passw).encode()).hexdigest() == user.passw
-        else:
-            return False
+        if user:
+            if hashlib.sha1((user.salt + passw).encode()).hexdigest() == user.passw:
+                return user
+        return None
 
-
-
-def main(connection : mysql.connector.MySQLConnection, userDao : UserDAO) -> None :
-    #region Creating and updating users
-
-    # user = User()
-    # # First
-    # user.login  = "moder"
-    # user.passw  = "123"
-    # user.name   = "Post Moderator"
-    # user.avatar = None
-    # user.email  = "moder@urk.net"
-
-    # Second
-    # user.login  = "user"
-    # user.passw  = "123"
-    # user.name   = "Experienced User"
-    # user.avatar = None
-    # user.email  = "user@urk.net"
-    # print(userDao.add_user (user) )
-
-    # print (userDao.get_users())
-    # print(userDao.get_user( id = "1e60564a-7ee9-11ed-ae3f-e4a8dfe36290" ))
-    # print(userDao.is_login_free( login = "moder" ))
-    # user.email  = "admin@gmail.net"
-    # print(userDao.update(user))
-
-    #endregion    
-    #region is_lree_login()
-    # user = userDao.get_user(login = "moder") ; print (user)
-    # print(userDao.delete(user))
-    # print("admin -", userDao.is_login_free( login = "admin" ))
-    # print("user  -", userDao.is_login_free( login = "user"  ))
-    # print("moder -", userDao.is_login_free( login = "moder" ))
-    #endregion
-    
-    print(userDao.auth_user(login = "admin", passw = "123"))
-    print(userDao.auth_user(login = "user", passw = "123"))
-    print(userDao.auth_user(login = "user", passw = "125"))
-
-
-    
-
-if __name__ == "__main__":
-    params = {
-        "host":"localhost",
-        "port":3306,
-        "database":"py191",
-        "user":"py191_user",
-        "password":"pass_191",
-        "charset":"utf8mb4",
-        "use_unicode":True,
-        "collation":"utf8mb4_general_ci"
-    }
-    try:
-        connection = mysql.connector.connect(**params)
-    except mysql.connector.Error as err:
-        print("Main: connection -> ", err)
-        exit()
-    else:
-        print("Connection OK")
-        userDao = UserDAO(connection)
-        main(connection, userDao)
-    finally:
-        connection.close()
-
-
-   
-   
