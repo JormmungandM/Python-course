@@ -25,7 +25,7 @@ if not auth_header :
 
  # Проверяем схему авторизации 
 if not auth_header.startswith( 'Basic' ):
-    send401( "Authorization header required" )
+    send401( "Basic Authorization header required" )
     exit()
 
 # Декодируем логин и пароль
@@ -55,10 +55,17 @@ except :
     send401( "Internal Error")
     exit()
 
+# получаем пользователя по логину и паролю 
 user = dao.UserDAO(con).auth_user( user_login, user_password)
 if not user:
     send401( "Credentials rejected" )
     exit()  
+
+# генерируем токен для пользователя 
+access_token = dao.AccessTokenDAO( con ).create( user )
+if not access_token :
+    send401( "Token creation error" )
+    exit()
 
 print( "Status: 200 OK" )
 print( "Content-Type: application/json; charset=UTF-8" )
@@ -66,7 +73,7 @@ print( "Cache-Control: no-store" )
 print( "Pragma: no-cache" )
 print()
 print( f'''{{
-    "access_token": "{user.id}",
+    "access_token": "{access_token.token}",
     "token_type": "Bearer",
-    "expires_in": 3600
+    "expires_in": "{access_token.expires}"
 }}''', end='' )

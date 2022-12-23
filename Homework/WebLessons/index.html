@@ -50,13 +50,24 @@
     function itemsButtonClick(e){
         
         var access_token = window.sessionStorage.getItem( "access_token" ) ;
-        document.getElementById("out").textContent = access_token
+        
         fetch( "/items", {
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + access_token
         }
-        })
+        }).then( async r => {
+        if( r.status == 401 ) {
+            alert( await r.text() ) ;
+            // проверка токена отклонена - удалить токен из хранилища
+        }
+        else if( r.status == 200 ) {
+            out.innerText = await r.text() ;
+        }
+        else {
+            console.log( r ) ;
+        }
+    } ) ;
     }
 
     function loginButtonClick(e){
