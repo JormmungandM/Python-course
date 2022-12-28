@@ -1,4 +1,4 @@
-#!C:\Users\Jormmungand\AppData\Local\Microsoft\WindowsApps\python.exe
+#!C:\Users\Jormmungand\AppData\Local\Microsoft\WindowsApps\python3.10.exe
 
 import os, sys 
 import urllib.parse

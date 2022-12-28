@@ -1,4 +1,4 @@
-#!C:\Users\Jormmungand\AppData\Local\Microsoft\WindowsApps\python.exe
+#!C:\Users\Jormmungand\AppData\Local\Microsoft\WindowsApps\python3.10.exe
 
 import os, sys
  
@@ -13,8 +13,8 @@ auth_header = None
  
 if 'HTTP_AUTHORIZATION' in os.environ.keys() : 
     auth_header = os.environ['HTTP_AUTHORIZATION'] 
-# elif 'REDIRECT_HTTP_AUTHORIZATION' in os.environ.keys() : 
-#     auth_header = os.environ['REDIRECT_HTTP_AUTHORIZATION'] 
+elif 'REDIRECT_HTTP_AUTHORIZATION' in os.environ.keys() : 
+    auth_header = os.environ['REDIRECT_HTTP_AUTHORIZATION'] 
  
  # Проверяем наличие заголовка
 if not auth_header : 

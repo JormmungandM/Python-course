@@ -1,4 +1,4 @@
-#!C:\Users\Jormmungand\AppData\Local\Microsoft\WindowsApps\python.exe
+#!C:\Users\Jormmungand\AppData\Local\Microsoft\WindowsApps\python3.10.exe
 
 import os, sys
 import base64
@@ -52,7 +52,7 @@ import mysql.connector
 try:
     con = mysql.connector.connect(**db.conf)
 except :
-    send401( "Internal Error")
+    send401( "Connection DB Error")
     exit()
 
 # получаем пользователя по логину и паролю 
