@@ -62,10 +62,13 @@ if not user:
     exit()  
 
 # генерируем токен для пользователя 
-access_token = dao.AccessTokenDAO( con ).create( user )
+access_token = dao.AccessTokenDAO( con ).checkActiveToken( user )
 if not access_token :
-    send401( "Token creation error" )
+    send401( "Token creation error")
     exit()
+
+
+
 
 print( "Status: 200 OK" )
 print( "Content-Type: application/json; charset=UTF-8" )

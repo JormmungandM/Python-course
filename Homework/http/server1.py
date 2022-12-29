@@ -1,8 +1,68 @@
 import base64
 from http.server import HTTPServer, BaseHTTPRequestHandler
-import os
+import os, sys
+
+import db, dao
+import mysql.connector
+
+
+class DBService:
+    connection: mysql.connector.MySQLConnection = None
+    def get_connection(self) -> mysql.connector.MySQLConnection :
+        if DBService.connection is None or not DBService.connection.is_connected():
+            try:
+                DBService.connection = mysql.connector.connect(**db.conf)
+            except:
+                print("Connection error")
+                DBService.connection = None
+            else:
+                print("Connection success")
+        return DBService.connection 
+              
+db_service: DBService = None
+
+class DbService : 
+    __connection:mysql.connector.MySQLConnection = None 
+ 
+    def get_connection( self ) -> mysql.connector.MySQLConnection : 
+        if DbService.__connection is None or not DbService.__connection.is_connected() : 
+            # print( db.conf ) 
+            try : 
+                DbService.__connection = mysql.connector.connect( **db.conf ) 
+            except mysql.connector.Error as err : 
+                print( err ) 
+                DbService.__connection = None 
+        return DbService.__connection 
+ 
+ 
+class DAOService : 
+ 
+    def __init__( self, db_service ) -> None: 
+        self.__db_service: DbService = db_service 
+        self.__user_dao: dao.UserDAO = None                  # угода іменування: до полів з "__" додається назва класу:  
+        self.__access_token_dao: dao.AccessTokenDAO = None   # "DaoService._DaoService__user_dao". Це аналог "private" 
+        return 
+ 
+    def get_user_dao( self ) -> dao.UserDAO : 
+        if self.__user_dao is None : 
+            self.__user_dao = dao.UserDAO( self.__db_service.get_connection() ) 
+        return self.__user_dao 
+ 
+    def get_access_token_dao( self ) -> dao.AccessTokenDAO : 
+        if self.__access_token_dao is None : 
+            self.__access_token_dao = dao.AccessTokenDAO( self.__db_service.get_connection() ) 
+        return self.__access_token_dao
+
+dao_service : DAOService = None
+
 
 class MainHandler( BaseHTTPRequestHandler ) :
+
+    def __init__(self, request, client_address, server) -> None:
+        super().__init__(request, client_address, server)           # RequestScoped - выполняется при каждом запросе
+        # print( 'init', self.command )                             # self.command - метод запроса (GET, POST, ...)
+
+
     def do_GET( self ) -> None :
         print( self.path )                        # вывод в консоль (не в ответ сервера)
         path_parts = self.path.split( "/" )       # разделенный на части запрос, path_parts[0] - пустой, т.к. path начинается со "/" 
@@ -11,7 +71,6 @@ class MainHandler( BaseHTTPRequestHandler ) :
         if self.path == "/" :
             self.path = "/index.html"
         fname = "./Homework/http" + self.path
-        print(fname)
         if os.path.isfile( fname ) :              # запрос - существующий файл
             #print( fname, "file" )
             self.flush_file( fname )
@@ -79,10 +138,13 @@ class MainHandler( BaseHTTPRequestHandler ) :
         # Разделяем логин и пароль по первому ":" (в пароле могут быть свои ":")
         user_login, user_password = cred.split( ':', maxsplit = 1 )    
 
-        self.send_response( 200 )
-        self.send_header( "Content-Type", "text/html" )
-        self.end_headers()
-        self.wfile.write( (user_login + user_password).encode() )
+        user_dao = dao_service.get_user_dao()
+        user = user_dao.auth_user(user_login,user_password)
+        if user is None:
+            self.send_401( "Credentials rejected" )
+            return
+
+        self.send_200( user.id )
         return
 
     def send_401( self, message = None ) :
@@ -108,9 +170,12 @@ def main() -> None :
     http_server = HTTPServer( ( '127.0.0.1', 88 ), MainHandler )
     try :
         print( "Server started" )
+        dao_service = DAOService( DBService() )
         http_server.serve_forever()
     except :
         print( "Server stopped" )
+        excep = sys.exc_info()[1]
+        print(excep.args[0])
 
 
 if __name__ == "__main__" :
