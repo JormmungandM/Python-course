@@ -6,54 +6,39 @@ import db, dao
 import mysql.connector
 
 
-class DBService:
-    connection: mysql.connector.MySQLConnection = None
-    def get_connection(self) -> mysql.connector.MySQLConnection :
-        if DBService.connection is None or not DBService.connection.is_connected():
-            try:
-                DBService.connection = mysql.connector.connect(**db.conf)
-            except:
-                print("Connection error")
-                DBService.connection = None
-            else:
-                print("Connection success")
-        return DBService.connection 
-              
-db_service: DBService = None
+class DBService :
+    __connection:mysql.connector.MySQLConnection = None
 
-class DbService : 
-    __connection:mysql.connector.MySQLConnection = None 
+    def get_connection( self ) -> mysql.connector.MySQLConnection :
+        if DBService.__connection is None or not DBService.__connection.is_connected() :
+            # print( db.conf )
+            try :
+                DBService.__connection = mysql.connector.connect( **db.conf )
+            except mysql.connector.Error as err :
+                print( err )
+                DBService.__connection = None
+        return DBService.__connection
  
-    def get_connection( self ) -> mysql.connector.MySQLConnection : 
-        if DbService.__connection is None or not DbService.__connection.is_connected() : 
-            # print( db.conf ) 
-            try : 
-                DbService.__connection = mysql.connector.connect( **db.conf ) 
-            except mysql.connector.Error as err : 
-                print( err ) 
-                DbService.__connection = None 
-        return DbService.__connection 
- 
- 
-class DAOService : 
- 
-    def __init__( self, db_service ) -> None: 
-        self.__db_service: DbService = db_service 
-        self.__user_dao: dao.UserDAO = None                  # угода іменування: до полів з "__" додається назва класу:  
-        self.__access_token_dao: dao.AccessTokenDAO = None   # "DaoService._DaoService__user_dao". Це аналог "private" 
-        return 
- 
-    def get_user_dao( self ) -> dao.UserDAO : 
-        if self.__user_dao is None : 
-            self.__user_dao = dao.UserDAO( self.__db_service.get_connection() ) 
-        return self.__user_dao 
- 
-    def get_access_token_dao( self ) -> dao.AccessTokenDAO : 
-        if self.__access_token_dao is None : 
-            self.__access_token_dao = dao.AccessTokenDAO( self.__db_service.get_connection() ) 
+class DAOService :
+
+    def __init__( self, db_service ) -> None:
+        self.__db_service: DBService = db_service
+        self.__user_dao: dao.UserDAO = None                  # угода іменування: до полів з "__" додається назва класу: 
+        self.__access_token_dao: dao.AccessTokenDAO = None   # "DaoService._DaoService__user_dao". Це аналог "private"
+        return
+
+    def get_user_dao( self ) -> dao.UserDAO :
+        if self.__user_dao is None :
+            self.__user_dao = dao.UserDAO( self.__db_service.get_connection() )
+        return self.__user_dao
+
+    def get_access_token_dao( self ) -> dao.AccessTokenDAO :
+        if self.__access_token_dao is None :
+            self.__access_token_dao = dao.AccessTokenDAO( self.__db_service.get_connection() )
         return self.__access_token_dao
 
-dao_service : DAOService = None
+dao_service: DAOService = None
+
 
 
 class MainHandler( BaseHTTPRequestHandler ) :
@@ -85,6 +70,7 @@ class MainHandler( BaseHTTPRequestHandler ) :
         return
 
     def log_request(self, code: int | str = ..., size: int | str = ...) -> None:
+        '''Метод, выводящий в консоль данные о запросе'''
         # return super().log_request(code, size)
         return
 
@@ -137,15 +123,29 @@ class MainHandler( BaseHTTPRequestHandler ) :
 
         # Разделяем логин и пароль по первому ":" (в пароле могут быть свои ":")
         user_login, user_password = cred.split( ':', maxsplit = 1 )    
-
+        
+        # підключаємо userdao
         user_dao = dao_service.get_user_dao()
-        user = user_dao.auth_user(user_login,user_password)
-        if user is None:
+        user = user_dao.auth_user( user_login, user_password )
+        if user is None :
             self.send_401( "Credentials rejected" )
             return
 
-        self.send_200( user.id )
+        token_dao = dao_service.get_access_token_dao()
+        access_token = token_dao.checkActiveToken( user )
+        if access_token is None:
+            self.send_401( "Token creation error" )
+            return
+
+        self.send_200( 
+            f'''{{
+            "access_token": "{access_token.token}",
+            "token_type": "Bearer",
+            "expires_in": "{access_token.expires}"
+        }}''', 'json')
         return
+
+
 
     def send_401( self, message = None ) :
         self.send_response( 401 )
@@ -167,15 +167,14 @@ class MainHandler( BaseHTTPRequestHandler ) :
         return
 
 def main() -> None :
+    global dao_service
     http_server = HTTPServer( ( '127.0.0.1', 88 ), MainHandler )
     try :
+        dao_service = DAOService( DBService() )   # ~ Inject
         print( "Server started" )
-        dao_service = DAOService( DBService() )
         http_server.serve_forever()
     except :
         print( "Server stopped" )
-        excep = sys.exc_info()[1]
-        print(excep.args[0])
 
 
 if __name__ == "__main__" :

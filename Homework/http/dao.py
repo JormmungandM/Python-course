@@ -187,19 +187,45 @@ class AccessToken :
             self.expires = row["expires"] 
 
 
+
 class AccessTokenDAO :
     def __init__( self, db: mysql.connector.MySQLConnection ) -> None :
         self.db = db
 
-    def create( self, user: str|User ) -> AccessToken|None :
-        ''' user - user_id only OR User instance object '''
+    def checkActiveToken( self, user: str|User ) -> AccessToken|None :
         user_id = None
+        token = None
         if isinstance( user, str ) :   # str - user_id only
             user_id = user
         elif isinstance( user, User )  :
             user_id = user.id
 
         if not user_id : return None
+        sql = "SELECT * FROM access_tokens WHERE user_id=%s"
+        try:
+            cursor = self.db.cursor()
+            cursor.execute(sql, ( user_id, ))
+            row = cursor.fetchone()
+            if row:                                     # если токен есть, то проверяем сроки
+                token = AccessToken(row)
+                if token.expires < datetime.now() or ((token.expires - datetime.now()).total_seconds() / 60) < 10:      # если вышел срок токена или если до конца срока осталось менее 10 минут
+                    token = self.miniUpdate(user_id)
+            else:                                       # если токена нету, то создаем новый
+                token = self.create(user_id)
+        except :
+            return None
+        else :
+            return token
+        finally :
+            try : cursor.close()
+            except : pass
+
+    # 
+    def miniUpdate(self, user_id : str) -> AccessToken:
+        if  self.delete(user_id):           # удаляем токен
+            return self.create(user_id)     # создаем новый и возвращаем
+
+    def create( self, user_id: str ) -> AccessToken|None :
         access_token = AccessToken()
         access_token.token   = random.randbytes(20).hex()  # 20 bytes = 40 hex-digits = 160 bit
         access_token.user_id = user_id
@@ -214,6 +240,20 @@ class AccessTokenDAO :
             return None
         else :
             return access_token
+        finally :
+            try : cursor.close()
+            except : pass
+
+    def delete(self, user_id: str) -> bool:                 # удаляем токин по user_id
+        sql = "DELETE FROM access_tokens WHERE user_id=%s"
+        try :
+            cursor = self.db.cursor()
+            cursor.execute(sql, ( user_id, ))
+            self.db.commit()
+        except :
+            return False
+        else :
+            return True
         finally :
             try : cursor.close()
             except : pass
