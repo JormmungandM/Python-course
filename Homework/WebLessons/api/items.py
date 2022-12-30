@@ -42,7 +42,7 @@ async def connection() -> mysql.connector :
     try:
         con = mysql.connector.connect(**db.conf)
     except asyncio.CancelledError :    
-        send401( "Connection DB Error -> Task Erro" )
+        send401( "Connection DB Error -> Task Error" )
         exit()
     except :
         send401( "Connection DB Error")
