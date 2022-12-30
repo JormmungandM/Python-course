@@ -1,1 +1,0 @@
-![alt text](https://github.com/JormmungandM/Python-course/blob/main/Homework/Lesson(12.12)/Result.png)
