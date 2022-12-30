@@ -16,6 +16,7 @@ def send401( message:str = None ) -> None:
     if message : print( message, end='' )
     return
 
+
 async def checkHeader():
 
     auth_header = None 
@@ -47,14 +48,14 @@ async def checkHeader():
     except:
         send401( "Malformed credentials: Login:Password base54 encoded expected" )
         exit()
-
     return cred
 
 async def connection() -> mysql.connector :
     try:
         con = mysql.connector.connect(**db.conf)
+       
     except asyncio.CancelledError :    
-        send401( "Connection DB Error -> Task Erro" )
+        send401( "Connection DB Error -> Task Error" )
         exit()
     except :
         send401( "Connection DB Error")
@@ -84,7 +85,6 @@ async def checkToken():
     if not access_token :
         send401( "Token creation error")
         exit()
-    
     return access_token  
 
 
