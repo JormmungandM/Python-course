@@ -91,7 +91,7 @@ class UserDAO:
             print("UserDAO: get_user -> " + err)
             return None
         else:
-            return tuple( User(row).print() for row in cursor)
+            return tuple( User(row) for row in cursor)
         finally:
             cursor.close()
         return

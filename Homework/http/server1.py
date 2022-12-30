@@ -59,6 +59,8 @@ class MainHandler( BaseHTTPRequestHandler ) :
         if os.path.isfile( fname ) :              # запрос - существующий файл
             #print( fname, "file" )
             self.flush_file( fname )
+        elif path_parts[1] == "items" :            # запрос - /items
+            self.items()
         elif path_parts[1] == "auth" :            # запрос - /auth
             self.auth()
         else :
@@ -137,14 +139,55 @@ class MainHandler( BaseHTTPRequestHandler ) :
             self.send_401( "Token creation error" )
             return
 
-        self.send_200( 
-            f'''{{
+        json =  f'''{{
             "access_token": "{access_token.token}",
             "token_type": "Bearer",
             "expires_in": "{access_token.expires}"
-        }}''', 'json')
+        }}'''
+
+        self.send_200( json, 'json')
+
         return
 
+    def items( self ):
+        answer = f"Users\n"
+        # Проверяем наличие заголовка Authorization
+        auth_header = self.headers.get( "Authorization" ) 
+        if auth_header is None :
+            self.send_401( "Authorization header required" )
+            return
+
+        # Проверяем формат 
+        if not auth_header.startswith( 'Bearer' ):
+            self.send401( "Bearer Authorization header required" )
+            return
+
+        # Извлекаем токен
+        access_token = auth_header[7:]   # убираем 'Bearer' + space
+
+        # подключаем token_dao
+        token_dao = dao_service.get_access_token_dao()
+        token = token_dao.get( access_token )
+
+        if not token :
+            self.send401( "Token rejected" )
+            return
+        
+        # подключаем user_dao
+        user_dao = dao_service.get_user_dao()
+        users = user_dao.get_users()
+        if users is None :
+            self.send_401( "Credentials rejected" )
+            return  
+        
+        for user in users:
+            answer += f"User: {user.name} ; {user.email}\n"
+
+        self.send_200(answer) 
+        
+        return
+        
+            
 
 
     def send_401( self, message = None ) :
