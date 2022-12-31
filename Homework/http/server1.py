@@ -150,7 +150,7 @@ class MainHandler( BaseHTTPRequestHandler ) :
         return
 
     def items( self ):
-        answer = f"Users\n"
+      
         # Проверяем наличие заголовка Authorization
         auth_header = self.headers.get( "Authorization" ) 
         if auth_header is None :
@@ -173,6 +173,7 @@ class MainHandler( BaseHTTPRequestHandler ) :
             self.send401( "Token rejected" )
             return
         
+        answer = f"Users\n"
         # подключаем user_dao
         user_dao = dao_service.get_user_dao()
         users = user_dao.get_users()
